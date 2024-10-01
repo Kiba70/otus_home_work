@@ -7,5 +7,6 @@ import (
 )
 
 func main() {
+	// Используем функцию reverse.String согласно требованиям ДЗ
 	fmt.Println(reverse.String("Hello, OTUS!"))
 }
