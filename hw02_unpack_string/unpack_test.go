@@ -21,6 +21,7 @@ func TestUnpack(t *testing.T) {
 		{input: "\n3aaa0b3", expected: "\n\n\naabbb"},
 		{input: "&3aaa0b3", expected: "&&&aabbb"},
 		{input: "&1aaa0b0", expected: "&aa"},
+		{input: "&1f3#5aa0b0", expected: "&fff#####a"},
 		// uncomment if task with asterisk completed
 		{input: `qwe\4\5`, expected: `qwe45`},
 		{input: `qwe\45`, expected: `qwe44444`},
@@ -48,7 +49,7 @@ func TestUnpack(t *testing.T) {
 }
 
 func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b"}
+	invalidStrings := []string{"3abc", "45", "aaa10b", `e\fs`, `s3\n8`}
 
 	for _, tc := range invalidStrings {
 		// tc := tc // Не понятно, для чего была сделана данная конструкция с затенением

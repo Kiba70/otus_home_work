@@ -35,6 +35,9 @@ func Unpack(original string) (string, error) {
 	for _, r := range original {
 		switch { // Последовательность case важна!
 		case screen:
+			if !(r == '\\' || (r >= '0' && r <= '9')) { // Экранировать разрешается только цифры и символ '\'
+				return "", ErrInvalidString
+			}
 			if _, err = result.WriteRune(prevRune); err != nil {
 				return "", ErrAppendRune
 			}
