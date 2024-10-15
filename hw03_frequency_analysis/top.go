@@ -1,6 +1,7 @@
 package hw03frequencyanalysis
 
-func Top10(_ string) []string {
-	// Place your code here.
+func Top10(text string) []string {
+	var result []string
+
 	return nil
 }
