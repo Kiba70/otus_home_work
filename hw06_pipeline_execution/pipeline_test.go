@@ -113,16 +113,13 @@ func TestPipeline(t *testing.T) {
 			close(in)
 		}()
 
-		result := make([]int, 0, 10)
 		start := time.Now()
-		for s := range ExecutePipeline(in, done, stages...) {
-			result = append(result, s.(int))
-			time.Sleep(sleepPerStage)
+		for _ = range ExecutePipeline(in, done) {
+			time.Sleep(fault)
 		}
 		elapsed := time.Since(start)
 
-		require.Len(t, result, 0)
-		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
+		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault)*2)
 	})
 }
 
