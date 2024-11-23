@@ -114,7 +114,7 @@ func TestPipeline(t *testing.T) {
 		}()
 
 		start := time.Now()
-		for _ = range ExecutePipeline(in, done) {
+		for range ExecutePipeline(in, done) {
 			time.Sleep(fault)
 		}
 		elapsed := time.Since(start)
