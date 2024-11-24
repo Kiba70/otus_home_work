@@ -33,30 +33,21 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out { //nolint: gocognit
 
 	if sLen == 1 {
 		go func() {
-			chClosed := false
-			toClose := func() {
-				if !chClosed {
-					close(chOut)
-					chClosed = true
-				}
-			}
 			for {
 				select {
 				case <-done:
-					toClose() // Закрываем выходной канал, но не выходим (для вычитки из stage)
-					for {     // Вычитываем входной канал и ждём закрытия
+					close(chOut) // Закрываем выходной канал, но не выходим (для вычитки из stage)
+					for {        // Вычитываем входной канал и ждём закрытия
 						if _, ok := <-in; !ok {
 							return
 						}
 					}
 				case v, ok := <-in:
 					if !ok {
-						toClose()
+						close(chOut)
 						return
 					}
-					if !chClosed {
-						chOut <- v
-					}
+					chOut <- v
 				}
 			}
 		}()
