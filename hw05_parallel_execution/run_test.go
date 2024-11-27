@@ -98,7 +98,8 @@ func TestRun(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		require.Eventually(t, func() bool { return runConcurentlyTasks.Load() > 1 }, sumTime, time.Millisecond, "not parallel")
+		require.Eventually(t, func() bool { return runConcurentlyTasks.Load() > 1 },
+			sumTime, time.Millisecond, "not parallel")
 		wg.Wait()
 
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
@@ -138,7 +139,8 @@ func TestRun(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		require.Eventually(t, func() bool { return atomic.LoadInt32(&runConcurentlyTasks) > 1 }, sumTime, time.Millisecond, "not parallel")
+		require.Eventually(t, func() bool { return atomic.LoadInt32(&runConcurentlyTasks) > 1 },
+			sumTime, time.Millisecond, "not parallel")
 		wg.Wait()
 
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
