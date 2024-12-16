@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -31,11 +32,12 @@ func ReadDir(dir string) (Environment, error) {
 			continue // "=" не должно быть в имени файла
 		}
 
-		f, err := os.Open(dir + "/" + entry.Name())
+		f, err := os.Open(filepath.Join(dir, entry.Name()))
 		if err != nil {
 			slog.Error("Не могу открыть файл", "error", err)
 			continue
 		}
+		// Не используем defer т.к. f необходимо закрыть до выхода из функции
 
 		ev := EnvValue{}
 
@@ -43,16 +45,17 @@ func ReadDir(dir string) (Environment, error) {
 		if fStat.Size() == 0 {
 			ev.NeedRemove = true
 			env[entry.Name()] = ev
-			continue
+		} else {
+			scanner := bufio.NewScanner(f)
+			scanner.Scan()
+
+			ev.Value = string(bytes.ReplaceAll([]byte(scanner.Text()), []byte{0}, []byte{10}))
+			ev.Value = strings.TrimRight(ev.Value, "\t ")
+
+			env[entry.Name()] = ev
 		}
 
-		scanner := bufio.NewScanner(f)
-		scanner.Scan()
-
-		ev.Value = string(bytes.ReplaceAll([]byte(scanner.Text()), []byte{0}, []byte{10}))
-		ev.Value = strings.TrimRight(ev.Value, "\t ")
-
-		env[entry.Name()] = ev
+		f.Close()
 	}
 
 	return env, nil
