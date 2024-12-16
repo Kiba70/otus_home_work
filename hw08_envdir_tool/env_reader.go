@@ -32,20 +32,27 @@ func ReadDir(dir string) (Environment, error) {
 			continue // "=" не должно быть в имени файла
 		}
 
-		f, err := os.Open(filepath.Join(dir, entry.Name()))
-		if err != nil {
-			slog.Error("Не могу открыть файл", "error", err)
-			continue
-		}
-		// Не используем defer т.к. f необходимо закрыть до выхода из функции
+		func() { // Проще выделить в функцию вместо f.Close() во всех точках выхода
+			f, err := os.Open(filepath.Join(dir, entry.Name()))
+			if err != nil {
+				slog.Error("Не могу открыть файл", "error", err)
+				return
+			}
+			defer f.Close()
 
-		ev := EnvValue{}
+			ev := EnvValue{}
 
-		fStat, _ := f.Stat()
-		if fStat.Size() == 0 {
-			ev.NeedRemove = true
-			env[entry.Name()] = ev
-		} else {
+			fStat, err := f.Stat()
+			if err != nil {
+				slog.Error("Не могу выполнить fstat", "error", err)
+				return
+			}
+			if fStat.Size() == 0 {
+				ev.NeedRemove = true
+				env[entry.Name()] = ev
+				return
+			}
+
 			scanner := bufio.NewScanner(f)
 			scanner.Scan()
 
@@ -53,9 +60,7 @@ func ReadDir(dir string) (Environment, error) {
 			ev.Value = strings.TrimRight(ev.Value, "\t ")
 
 			env[entry.Name()] = ev
-		}
-
-		f.Close()
+		}()
 	}
 
 	return env, nil
