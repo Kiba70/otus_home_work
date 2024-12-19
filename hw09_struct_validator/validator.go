@@ -37,7 +37,7 @@ func (v ValidationErrors) Error() string {
 	return strings.TrimRight(strBuilder.String(), "\n")
 }
 
-// method for collecting all validation errors
+// method for collecting all validation errors.
 func (v *ValidationErrors) logErr(name string, err error) {
 	*v = append(*v, ValidationError{
 		Field: name,
@@ -104,7 +104,7 @@ func Validate(v interface{}) error {
 }
 
 // function responsible for calling a corresponding validation func
-// for each of its element
+// for each of its element.
 func valSlice(rule []string, valErrors *ValidationErrors, val interface{}, name string) error {
 	switch reflect.ValueOf(val).Index(0).Kind().String() {
 	case "string":
