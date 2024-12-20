@@ -70,25 +70,26 @@ func Validate(v interface{}) error {
 
 			// call a specific function based on a field type
 			// nested structs will recursively call Validate func
+			vf := reflect.ValueOf(v).Field(i)
 			switch f.Type.Kind().String() {
 			case "struct":
 				if valStr == "nested" {
-					validation := Validate(reflect.ValueOf(v).Field(i).Interface())
+					validation := Validate(vf.Interface())
 					if validation != nil {
 						valErrors.logErr(f.Name, validation)
 					}
 				}
 			case "slice":
 				// throw error if the slice is empty, an attempt to continue will cause panic
-				if reflect.ValueOf(v).Field(i).Len() == 0 {
+				if vf.Len() == 0 {
 					valErrors.logErr(f.Name, errSliceEmpty)
 					continue
 				}
-				err = valSlice(rule, &valErrors, reflect.ValueOf(v).Field(i).Interface(), f.Name)
+				err = valSlice(rule, &valErrors, vf.Interface(), f.Name)
 			case "string":
-				err = valString(rule, &valErrors, reflect.ValueOf(v).Field(i).String(), f.Name)
+				err = valString(rule, &valErrors, vf.String(), f.Name)
 			case "int", "int8", "int16", "int32", "int64":
-				err = valInt(rule, &valErrors, reflect.ValueOf(v).Field(i).Int(), f.Name)
+				err = valInt(rule, &valErrors, vf.Int(), f.Name)
 			default:
 				valErrors.logErr(f.Name, errUnsuppType)
 			}
@@ -106,6 +107,10 @@ func Validate(v interface{}) error {
 // function responsible for calling a corresponding validation func
 // for each of its element.
 func valSlice(rule []string, valErrors *ValidationErrors, val interface{}, name string) error {
+	if len(rule) != 2 {
+		valErrors.logErr(name, errUnsuppRule)
+		return nil
+	}
 	switch reflect.ValueOf(val).Index(0).Kind().String() {
 	case "string":
 		for j := range reflect.ValueOf(val).Len() {
